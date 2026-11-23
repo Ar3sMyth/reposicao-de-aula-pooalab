@@ -1,101 +1,124 @@
 # Reposição de Aula
 
-Trabalho de Programação Orientada a Objetos Avançada da UCSal, POOALAB 2026.2.
-Turma ADS-NOT-PIT-4S-T1, professor Mario Jorge Pereira.
+Aplicação local para uma turma comparar horários de reposição. Cada aluno
+marca todas as opções em que pode comparecer. O professor acompanha o
+placar e consulta as respostas por código.
+
+POOALAB 2026.2 · ADS-NOT-PIT-4S-T1 · UCSal
+Professor Mario Jorge Pereira
+
+[Repositório](https://github.com/Ar3sMyth/reposicao-de-aula-pooalab)
 
 Andrey Soares dos Santos, Sophia Desiderio e Luis Fernando Alves.
 
-Quando uma aula precisa ser reposta, a turma indica em quais horários pode
-comparecer. O sistema reúne as respostas, soma as indicações de cada horário
-e mostra quando há empate. A decisão final fica com a turma e o professor.
-
-## Como rodar
+## Como executar
 
 No Windows, extraia o ZIP e dê dois cliques em **Iniciar Reposicao de Aula.cmd**.
-O iniciador abre o navegador e usa o Java instalado. Se faltar Java, baixa
-o Eclipse Temurin para a pasta do projeto. Esse primeiro download precisa de
-internet e Windows x64 ou ARM64. Use `Ctrl+C` na janela do iniciador para parar.
+O iniciador usa Java 8 ou superior. Se faltar Java, baixa o Temurin 21 para a
+pasta do projeto em Windows x64 ou ARM64. Só esse primeiro download requer
+internet. Mantenha a janela do iniciador aberta e use `Ctrl+C` para parar.
 
-Com Java 8 ou superior, também dá para executar pelo terminal:
+Com Java 8 ou superior, o JAR também pode ser aberto pelo terminal:
 
 ```sh
 java -jar reposicao-de-aula.jar
 ```
 
-Abra [http://127.0.0.1:8080](http://127.0.0.1:8080). Se a porta estiver ocupada,
-passe `--porta=8081` e abra o endereço com a porta 8081.
+Abra [127.0.0.1:8080](http://127.0.0.1:8080). Se necessário, troque a porta
+com `--porta=8081`. O JAR vem no ZIP. Quem baixar o código pelo GitHub pode
+gerá-lo com os comandos da seção de testes.
 
-## Senha do professor
-
-Na primeira abertura, o iniciador mostra uma senha de seis dígitos. Guarde-a
-com o professor e use-a para entrar na aba **Professor**. Ela continua válida
-ao reiniciar a mesma sessão. Os alunos votam apenas com o código fictício.
-Use **Sair** antes de passar o computador para outra pessoa. Mantenha a janela
-do iniciador com o professor, pois ela exibe a senha na primeira abertura.
-
-Se perder a senha, feche o sistema e execute na pasta extraída:
+Na primeira abertura, o iniciador mostra a senha de seis dígitos da aba
+**Professor**. Guarde-a com o professor e use **Sair** antes de passar o computador.
+Para gerar outra senha, feche a aplicação
+e execute o comando abaixo. Se usa `--dados`, repita o caminho da sessão.
 
 ```powershell
 & '.\Iniciar Reposicao de Aula.cmd' --nova-senha-professor
 ```
 
-Se estiver usando uma demonstração com `--dados`, repita esse argumento para
-gerar a senha da sessão certa. A troca mantém as enquetes e o histórico.
+## Testes e demonstração
 
-## Como demonstrar
-
-1. Entre na aba **Professor** com a senha e clique em **Criar enquete**. Cadastre horários em 02/12/2026 às 18h, 03/12/2026 às 19h e
-   04/12/2026 às 20h.
-2. Na aba **Aluno**, use `A01` nas opções 1 e 2, `B02` na opção 1 e `C03` na opção 2.
-   O placar mostra três respostas e as indicações 2, 2 e 0.
-3. Use `a01` de novo, marcando só a opção 2. Ela fica na liderança com duas
-   indicações. O total de respostas continua três.
-4. Na aba **Professor**, confira **Respostas por código** e encerre a votação.
-5. Clique em **Nova enquete**. A anterior passa para **Histórico**. Abra o
-   histórico para conferir o placar e os horários informados por cada código.
-
-Para começar com o empate pronto, siga o [roteiro da apresentação](<docs/Reposição de Aula - Roteiro de Apresentação.pdf>).
-Ele usa uma cópia de `demo/exemplo.properties`.
-
-## Onde está o código
-
-- [Enquete.java](src/reposicao/Enquete.java) valida horários e respostas.
-  Cada código é uma chave no mapa. O placar percorre os horários e usa um
-  Stream para contar as respostas que marcam cada um.
-- [EnqueteService.java](src/reposicao/EnqueteService.java) coordena as ações.
-  Ele usa a interface [RepositorioEnquete](src/reposicao/RepositorioEnquete.java).
-  [EnqueteArquivo.java](src/reposicao/EnqueteArquivo.java) grava a enquete atual e o
-  histórico em um arquivo `.properties`.
-- [Aplicacao.java](src/reposicao/Aplicacao.java) recebe os formulários.
-  [Tela.java](src/reposicao/Tela.java) monta as páginas.
-  [AcessoProfessor.java](src/reposicao/AcessoProfessor.java) verifica a senha e a sessão.
-  [scripts/iniciar.ps1](scripts/iniciar.ps1) prepara o Java no Windows.
-
-O sistema é local. A senha protege a área Professor no navegador. Use códigos
-fictícios e uma instância por arquivo de dados. A hipótese
-sobre como a turma organiza reposições ainda precisa de validação com colegas.
-
-## Como compilar e testar
-
-O JDK fornece `javac` e `jar`. Os comandos abaixo executam `EnqueteTest` e
-recriam o JAR.
+Com um JDK 8 ou superior no PATH, os comandos abaixo compilam, executam
+`EnqueteTest` e geram o JAR. A versão da entrega foi conferida com Temurin 21
+no Windows e no Chrome em desktop e celular emulado.
 
 - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File ./compilar.ps1`
 - Linux ou macOS: `sh ./compilar.sh`
 
-## Material da entrega
+1. Entre em **Professor** e crie uma enquete com 02/12/2026 às 18h, 03/12/2026
+   às 19h e 04/12/2026 às 20h.
+2. Na aba **Aluno**, registre `A01` nas opções 1 e 2, `B02` na opção 1 e
+   `C03` na opção 2. O resultado fica em 2, 2 e 0.
+3. Reenvie `a01` marcando só a opção 2. Ela fica em primeiro lugar com duas
+   indicações e o total continua em três respostas.
+4. Na aba **Professor**, confira as escolhas por código e encerre. Crie outra
+   enquete e abra a primeira no **Histórico**.
 
-- Relatório acadêmico em [HTML](<docs/Reposição de Aula - Relatório Acadêmico.html>),
-  [PDF](<docs/Reposição de Aula - Relatório Acadêmico.pdf>) e
-  [Word](<docs/Reposição de Aula - Relatório Acadêmico.docx>).
-- [Slides da apresentação](<docs/Reposição de Aula - Apresentação POOALAB.pdf>),
-  [roteiro da apresentação](<docs/Reposição de Aula - Roteiro de Apresentação.pdf>)
-  e [demonstração de contingência](demo/roteiro-visual.pdf).
-- O relatório inclui o roteiro de validação e a declaração de uso de IA e
-  componentes de terceiros. A validação com colegas e a ciência do grupo estão
-  pendentes.
+Para iniciar direto pelo empate, use o exemplo fictício no PowerShell:
 
-A versão de entrega inclui acesso por senha na aba Professor e mantém o
-histórico de enquetes no arquivo de dados. O ZIP do Drive acompanha o código
-da branch `main`. Para atualizar a entrega, recompile o JAR e monte o ZIP
-sem os arquivos gerados em `dados/`, `.java/` ou `build/`.
+```powershell
+New-Item -ItemType Directory -Force dados | Out-Null
+$sessao = "dados/ensaio-$(Get-Date -Format yyyyMMdd-HHmmss).properties"
+Copy-Item demo/exemplo.properties $sessao
+& '.\Iniciar Reposicao de Aula.cmd' "--dados=$sessao"
+```
+
+## Anexo A · Ficha do problema
+
+- **Público e situação:** estudantes e docentes da UCSal quando precisam
+  combinar a reposição de uma aula.
+- **Problema e impacto esperado:** reunir disponibilidades e contar quantas
+  pessoas podem em cada horário pode dar trabalho se as respostas se espalham.
+- **Alternativa a investigar:** combinar pelo grupo da turma e contar
+  respostas manualmente. A equipe ainda precisa confirmar como isso acontece.
+- **Hipótese crítica:** a contagem em um único lugar facilita comparar
+  horários. Para verificar, observar como uma turma já marcou uma reposição
+  e testar se os colegas conseguem responder e interpretar o placar.
+- **Recorte:** reunir as escolhas e mostrar a contagem. A decisão final sobre
+  data e sala continua com a turma e o professor.
+
+## Anexo B · Registro de validação
+
+| Data e perfil | Hipótese | Evidência observada | Decisão |
+| --- | --- | --- | --- |
+| 23/11/2026 · teste técnico com dados fictícios | Um novo envio com o mesmo código substitui o anterior e o placar continua disponível após reiniciar. | A edição de A01 desempatou o placar sem aumentar o total de respostas. O histórico permaneceu disponível após reiniciar. | Manter a edição por código e gravar as enquetes encerradas no mesmo arquivo local. |
+
+**Método com o público:** pedir a alguém que já organizou uma reposição que
+relate como comparou os horários. Depois, observar um colega votar, alterar
+sua resposta e interpretar o empate. Registrar o perfil sem identificação.
+
+**Aprendizado e limite:** o teste confirmou o fluxo do software. A hipótese
+sobre a rotina da turma ainda não foi verificada com participantes reais.
+Nenhuma mudança de problema foi atribuída a entrevistas ou observações.
+
+## Anexo C · Definição do MVP
+
+- **Usuários e resultado:** professor abre e encerra a enquete. Alunos
+  informam horários. A turma compara as contagens por opção.
+- **Fluxo:** cadastrar de duas a quatro opções, responder por código, conferir
+  o placar, encerrar e recuperar as enquetes anteriores.
+- **Critérios de pronto:** código repetido substitui a resposta, empate fica
+  visível, ações do professor exigem senha e o histórico sobrevive ao reinício.
+- **Tecnologia:** Java com `HttpServer`, HTML e CSS para rodar no navegador
+  sem dependências externas. Um mapa agrupa as respostas, um Stream conta as
+  escolhas e o Repository separa a regra da gravação em `.properties`.
+- **Limites e próximo teste:** uma enquete aberta por vez, na mesma estação,
+  sem identificação de alunos ou votação remota. A senha protege a área do
+  professor no navegador. O próximo passo é observar o uso com colegas.
+
+## Anexo D · Roteiro do pitch
+
+Apresentar a dificuldade de comparar horários e a hipótese ainda pendente.
+Em seguida, abrir o exemplo, alterar A01, entrar como professor, encerrar e
+mostrar o histórico. Fechar explicando o recorte local e o teste com colegas
+que ainda precisa ser feito.
+
+- [Pitch em PDF](docs/pitch.pdf)
+- [Roteiro visual de contingência](demo/roteiro-visual.pdf)
+
+## Anexo E · Declaração de uso de IA e de terceiros
+
+O Codex apoiou a implementação, os testes e a documentação. O
+[Anexo E](docs/declaracao-ia-terceiros.pdf) reúne as fontes, licenças e campos
+de ciência da equipe.

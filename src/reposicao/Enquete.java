@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 final class Enquete {
     final String aula;
@@ -75,12 +74,16 @@ final class Enquete {
     }
 
     List<Placar> resultado() {
-        return horarios.stream()
-                .map(horario -> new Placar(horario, respostas.values().stream()
-                        .filter(disponiveis -> disponiveis.contains(horario)).count()))
-                .sorted(Comparator.comparingLong((Placar item) -> item.total).reversed()
-                        .thenComparing(item -> item.horario))
-                .collect(Collectors.toList());
+        List<Placar> placar = new ArrayList<>();
+        for (LocalDateTime horario : horarios) {
+            long total = respostas.values().stream()
+                    .filter(disponiveis -> disponiveis.contains(horario))
+                    .count();
+            placar.add(new Placar(horario, total));
+        }
+        placar.sort(Comparator.comparingLong((Placar item) -> item.total)
+                .reversed().thenComparing(item -> item.horario));
+        return placar;
     }
 
     static final class Placar {

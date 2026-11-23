@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+$pastaProjeto = Split-Path -Parent $PSScriptRoot
 
 function Testar-Java($caminho) {
     if (-not $caminho -or -not (Test-Path -LiteralPath $caminho -PathType Leaf)) {
@@ -20,7 +21,7 @@ function Instalar-Java {
         aarch64 = @('21.0.12.1','1','e82cc17e0bf89a25b0b0ed106d072f2ea420587d0a6870534b71b1dce3ae28c3')
     }
     $versao, $build, $sha256 = $pacote[$arquitetura]
-    $pasta = (New-Item -ItemType Directory -Force -Path (Join-Path $PSScriptRoot '.java')).FullName
+    $pasta = (New-Item -ItemType Directory -Force -Path (Join-Path $pastaProjeto '.java')).FullName
     $destino = Join-Path $pasta "temurin-$arquitetura-$versao-$build"
     $javaLocal = Join-Path $destino 'bin\java.exe'
     if (Testar-Java $javaLocal) { return $javaLocal }
@@ -68,8 +69,8 @@ function Instalar-Java {
 }
 
 try {
-    Set-Location -LiteralPath $PSScriptRoot
-    $jar = Join-Path $PSScriptRoot 'reposicao-de-aula.jar'
+    Set-Location -LiteralPath $pastaProjeto
+    $jar = Join-Path $pastaProjeto 'reposicao-de-aula.jar'
     if (-not (Test-Path -LiteralPath $jar -PathType Leaf)) {
         throw 'O JAR esta faltando. Extraia o ZIP completo antes de iniciar.'
     }

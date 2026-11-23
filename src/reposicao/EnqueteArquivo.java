@@ -10,14 +10,17 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.StringJoiner;
 
 final class EnqueteArquivo implements RepositorioEnquete {
     private final Path arquivo;
@@ -41,8 +44,8 @@ final class EnqueteArquivo implements RepositorioEnquete {
             Map<String, Set<LocalDateTime>> respostas = new LinkedHashMap<>();
             for (String chave : dados.stringPropertyNames()) {
                 if (chave.startsWith("voto.")) {
-                    respostas.put(chave.substring(5),
-                            lerHorarios(dados.getProperty(chave)).stream().collect(Collectors.toSet()));
+                    List<LocalDateTime> horariosDaResposta = lerHorarios(dados.getProperty(chave));
+                    respostas.put(chave.substring(5), new LinkedHashSet<>(horariosDaResposta));
                 }
             }
             String encerrada = dados.getProperty("encerrada");
@@ -62,9 +65,12 @@ final class EnqueteArquivo implements RepositorioEnquete {
         dados.setProperty("aula", enquete.aula);
         dados.setProperty("horarios", juntar(enquete.horarios));
         dados.setProperty("encerrada", Boolean.toString(enquete.encerrada));
-        enquete.respostas.forEach((codigo, horarios) -> dados.setProperty("voto." + codigo, juntar(horarios)));
+        for (Map.Entry<String, Set<LocalDateTime>> resposta : enquete.respostas.entrySet()) {
+            dados.setProperty("voto." + resposta.getKey(), juntar(resposta.getValue()));
+        }
         Files.createDirectories(arquivo.getParent());
         Path temporario = Files.createTempFile(arquivo.getParent(), "enquete-", ".tmp");
+        // Terminamos de escrever a nova enquete antes de substituir a anterior.
         try {
             try (Writer escritor = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8)) {
                 dados.store(escritor, "Reposição de Aula");
@@ -79,15 +85,26 @@ final class EnqueteArquivo implements RepositorioEnquete {
         }
     }
 
-    private static String juntar(java.util.Collection<LocalDateTime> horarios) {
-        return horarios.stream().sorted().map(LocalDateTime::toString).collect(Collectors.joining(","));
+    private static String juntar(Collection<LocalDateTime> horarios) {
+        List<LocalDateTime> ordenados = new ArrayList<>(horarios);
+        Collections.sort(ordenados);
+        StringJoiner texto = new StringJoiner(",");
+        for (LocalDateTime horario : ordenados) {
+            texto.add(horario.toString());
+        }
+        return texto.toString();
     }
 
     private static List<LocalDateTime> lerHorarios(String dados) {
         if (dados == null) {
             throw new IllegalArgumentException("Campo de horários ausente.");
         }
-        return dados.isEmpty() ? java.util.Collections.emptyList()
-                : Arrays.stream(dados.split(",", -1)).map(LocalDateTime::parse).collect(Collectors.toList());
+        List<LocalDateTime> horarios = new ArrayList<>();
+        if (!dados.isEmpty()) {
+            for (String horario : dados.split(",", -1)) {
+                horarios.add(LocalDateTime.parse(horario));
+            }
+        }
+        return horarios;
     }
 }

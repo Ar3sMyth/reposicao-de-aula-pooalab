@@ -39,3 +39,13 @@ Para encaminhar o projeto ao professor, use o ZIP extraível do Drive. Se ele
 precisar revisar o repositório privado, atribua acesso pela conta do GitHub.
 A equipe ainda precisa revisar a declaração, ensaiar na estação da apresentação
 e registrar evidências reais de validação, se forem coletadas.
+
+## Revisão para a apresentação
+
+O README agora concentra as instruções de execução, os quatro passos da
+demonstração e a função de cada arquivo Java. A contagem em `Enquete.resultado()`
+usa um laço para percorrer os horários e um Stream para contar as respostas.
+A ordenação ocorre em seguida. A leitura e a gravação de horários usam laços,
+com o mesmo formato dos arquivos de dados anteriores. O roteiro apresenta o
+trecho de código por nome de método. O iniciador do Windows continua na raiz,
+com o PowerShell de instalação em `scripts/`.

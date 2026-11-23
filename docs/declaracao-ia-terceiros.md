@@ -13,7 +13,7 @@ Declaração de uso de inteligência artificial e de componentes de terceiros
 
 | Ferramenta | Finalidade | Parte afetada | Revisão e validação realizadas |
 | --- | --- | --- | --- |
-| OpenAI Codex | Ideação, programação, testes e revisão | Recorte, código Java, HTML/CSS, iniciador Windows, persistência e testes | Temurin 8u492 na versão inicial. Revisão compilada com Temurin 21, com teste do iniciador, testes automatizados e fluxo no Chrome em desktop e celular emulado. Revisão coletiva pendente. |
+| OpenAI Codex | Ideação, programação, testes e revisão | Recorte, código Java, HTML/CSS, iniciador Windows, persistência e testes. Revisão do placar e da leitura e gravação dos horários. | Temurin 8u492 na versão inicial. Revisão compilada com Temurin 21, com teste do iniciador, testes automatizados e fluxo no Chrome em desktop e celular emulado. Revisão coletiva pendente. |
 | OpenAI Codex | Documentação e preparação da mostra | README, relatório acadêmico, guia de estudo, modelo de validação, declaração, pitch e contingência | Material confrontado com o manual, a página da disciplina e a implementação. Preenchimento e aprovação pelo grupo pendentes. |
 
 Os registros da demonstração são sintéticos. Nenhum deles é evidência de

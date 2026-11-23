@@ -2,10 +2,12 @@ package reposicao;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -25,13 +27,19 @@ public final class Aplicacao {
     private final EnqueteService servico;
     private final String host;
     private final byte[] css;
+    private final byte[] logo;
 
     private Aplicacao(EnqueteService servico, int porta) throws IOException {
         this.servico = servico;
         this.host = "127.0.0.1:" + porta;
-        try (InputStream recurso = Aplicacao.class.getResourceAsStream("/estilos.css")) {
+        this.css = lerRecurso("/estilos.css");
+        this.logo = lerRecurso("/ucsal.svg");
+    }
+
+    private static byte[] lerRecurso(String caminho) throws IOException {
+        try (InputStream recurso = Aplicacao.class.getResourceAsStream(caminho)) {
             if (recurso == null) {
-                throw new IOException("estilos.css não encontrado no pacote.");
+                throw new IOException(caminho + " não encontrado no pacote.");
             }
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             byte[] bloco = new byte[2048];
@@ -39,35 +47,55 @@ public final class Aplicacao {
             while ((lidos = recurso.read(bloco)) != -1) {
                 bytes.write(bloco, 0, lidos);
             }
-            css = bytes.toByteArray();
+            return bytes.toByteArray();
         }
     }
 
     public static void main(String[] args) {
         try {
             int porta = 8080;
+            boolean abrir = false;
             Path dados = Paths.get("dados", "enquete.properties");
             for (String arg : args) {
                 if (arg.startsWith("--porta=")) {
                     porta = Integer.parseInt(arg.substring(8));
                 } else if (arg.startsWith("--dados=")) {
                     dados = Paths.get(arg.substring(8));
+                } else if ("--abrir".equals(arg)) {
+                    abrir = true;
                 } else {
                     throw new IllegalArgumentException("Argumento desconhecido: " + arg);
                 }
             }
-            if (porta < 1024 || porta > 65535) {
-                throw new IllegalArgumentException("Escolha uma porta entre 1024 e 65535.");
+            if (porta != 0 && (porta < 1024 || porta > 65535)) {
+                throw new IllegalArgumentException("Escolha uma porta entre 1024 e 65535 ou use 0 para escolha automática.");
             }
-            Aplicacao app = new Aplicacao(new EnqueteService(new EnqueteArquivo(dados)), porta);
+            EnqueteService servico = new EnqueteService(new EnqueteArquivo(dados));
             HttpServer servidor = HttpServer.create(new InetSocketAddress("127.0.0.1", porta), 0);
+            Aplicacao app = new Aplicacao(servico, servidor.getAddress().getPort());
             servidor.createContext("/", app::atender);
             servidor.start();
-            System.out.println("Abra http://" + app.host + " no navegador. Para encerrar, use Ctrl+C.");
+            String endereco = "http://" + app.host;
+            System.out.println("Abra " + endereco + " no navegador. Para encerrar, use Ctrl+C.");
+            if (abrir) {
+                abrirNavegador(endereco);
+            }
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Não foi possível iniciar. " + e.getMessage());
             System.exit(1);
         }
+    }
+
+    private static void abrirNavegador(String endereco) {
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI.create(endereco));
+                return;
+            }
+        } catch (IOException | RuntimeException e) {
+            // O servidor continua disponível mesmo se o navegador não abrir.
+        }
+        System.out.println("Abra o endereço acima manualmente.");
     }
 
     private void atender(HttpExchange conexao) throws IOException {
@@ -94,6 +122,10 @@ public final class Aplicacao {
     private void mostrar(HttpExchange conexao, String rota) throws IOException {
         if ("/estilos.css".equals(rota)) {
             enviar(conexao, 200, "text/css; charset=utf-8", css);
+            return;
+        }
+        if ("/ucsal.svg".equals(rota)) {
+            enviar(conexao, 200, "image/svg+xml", logo);
             return;
         }
         Enquete enquete = servico.consultar().orElse(null);
@@ -208,7 +240,7 @@ public final class Aplicacao {
         conexao.getResponseHeaders().set("Cache-Control", "no-store");
         conexao.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
         conexao.getResponseHeaders().set("Content-Security-Policy",
-                "default-src 'none'; style-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+                "default-src 'none'; style-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
         conexao.sendResponseHeaders(status, conteudo.length);
         conexao.getResponseBody().write(conteudo);
     }

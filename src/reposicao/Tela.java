@@ -16,7 +16,7 @@ final class Tela {
     static String inicio(Enquete enquete, String aviso, Map<String, List<String>> dados) {
         if (enquete == null) {
             StringBuilder form = new StringBuilder("<h1>Criar enquete</h1>"
-                    + "<p>Informe a aula e de duas a quatro opções de data e horário.</p>"
+                    + "<p>Informe o nome da aula e escolha de dois a quatro horários.</p>"
                     + erro(aviso) + "<form method=\"post\" action=\"/criar\">"
                     + "<label for=\"aula\">Nome da aula</label>"
                     + "<input id=\"aula\" name=\"aula\" maxlength=\"80\" required value=\""
@@ -79,7 +79,7 @@ final class Tela {
         } else if (empatados > 1) {
             resumo = "Empate entre " + empatados + " horários com " + plural(maior, "indicação", "indicações") + ".";
         } else {
-            resumo = "O horário mais votado recebeu " + plural(maior, "indicação", "indicações") + ".";
+            resumo = "O horário com mais indicações recebeu " + plural(maior, "indicação", "indicações") + ".";
         }
         StringBuilder corpo = new StringBuilder("<h1>Resultado</h1><p>" + escapar(enquete.aula) + "</p>"
                 + erro(aviso) + (salvou ? "<p class=\"mensagem\" role=\"status\">Disponibilidade registrada.</p>" : "")
@@ -91,7 +91,7 @@ final class Tela {
         for (Enquete.Placar item : placar) {
             boolean lider = maior > 0 && item.total == maior;
             corpo.append("<tr><th scope=\"row\">").append(dataHora(item.horario))
-                    .append(lider ? "<small>" + (empatados > 1 ? "Empatado na liderança" : "Mais votado") + "</small>" : "")
+                    .append(lider ? "<small>" + (empatados > 1 ? "Empatado na liderança" : "Maior disponibilidade") + "</small>" : "")
                     .append("</th><td>").append(item.total).append("</td></tr>");
         }
         corpo.append("</tbody></table>");
@@ -114,7 +114,9 @@ final class Tela {
                 + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
                 + "<title>" + titulo + " | Reposição de Aula</title><link rel=\"stylesheet\" href=\"/estilos.css\"></head>"
                 + "<body><a class=\"pular\" href=\"#conteudo\">Ir para o conteúdo</a>"
-                + "<header><div class=\"topo\"><a class=\"nome\" href=\"/\">Reposição de Aula</a>"
+                + "<header><div class=\"topo\"><a class=\"nome\" href=\"/\">"
+                + "<img src=\"/ucsal.svg\" alt=\"UCSal\" width=\"112\" height=\"49\">"
+                + "<span>Reposição de Aula</span></a>"
                 + "<nav aria-label=\"Páginas\"><a href=\"/\"" + (resultado ? "" : " aria-current=\"page\"")
                 + ">Enquete</a><a href=\"/resultado\"" + (resultado ? " aria-current=\"page\"" : "")
                 + ">Resultado</a></nav></div></header><main id=\"conteudo\">" + corpo + "</main></body></html>";

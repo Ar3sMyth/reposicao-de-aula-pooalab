@@ -1,6 +1,7 @@
 # Roteiro do pitch
 
-Use o PDF que acompanha este roteiro como base. Antes de exportar a versão
+Use o PDF que acompanha este roteiro como base. Para preparar a sessão de
+ensaio com empate, siga a primeira página do [guia do grupo](Guia-do-grupo-Reposicao-de-Aula.pdf). Antes de exportar a versão
 final, atualize a lâmina de validação com o que o grupo observou de
 fato. Se não houver validação, preserve a indicação de pendência.
 

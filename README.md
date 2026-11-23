@@ -21,18 +21,27 @@ cada horário exige retrabalho. O projeto centraliza essa contagem. O grupo
 deve verificar o cenário com participantes reais antes de apresentá-lo como
 uma necessidade observada. Veja [problema e validação](docs/problema-validacao.md).
 
-## Executar
+## Abrir no Windows
 
-1. Extraia o ZIP para uma pasta. Abra o terminal nessa pasta.
-2. Rode `java -version`. Use Java 8 ou superior, com um navegador moderno.
-   A versão testada foi Eclipse Temurin 8u492 no Windows.
-3. Execute `java -jar reposicao-de-aula.jar`.
-4. Abra [http://127.0.0.1:8080](http://127.0.0.1:8080). Use `Ctrl+C` para parar.
+1. Extraia todo o ZIP para uma pasta em que você possa gravar.
+2. Dê dois cliques em **Iniciar Reposicao de Aula.cmd**. O sistema abre no navegador.
+3. Deixe a janela do iniciador aberta. Para parar, pressione `Ctrl+C` nessa janela.
 
-O JAR pronto roda sem Maven, banco de dados, internet ou instalação de
-bibliotecas. Se a porta estiver ocupada, execute
-`java -jar reposicao-de-aula.jar --porta=8081` e abra
-`http://127.0.0.1:8081`.
+O iniciador usa Java 8 ou superior quando encontra uma instalação compatível.
+Se precisar de Java, ele baixa o Eclipse Temurin para `.java/` dentro da pasta
+extraída, confere a soma SHA-256 do pacote e reutiliza a instalação nas próximas
+execuções. Esse primeiro download requer internet e Windows x64 ou ARM64.
+A instalação local dispensa acesso de administrador. Se o navegador não abrir,
+use o endereço exibido na janela do iniciador. Abra uma instância por arquivo
+de dados.
+
+### Execução manual com Java
+
+No Windows, Linux ou macOS, com Java 8 ou superior, abra o terminal na pasta
+extraída, execute `java -jar reposicao-de-aula.jar` e acesse
+[http://127.0.0.1:8080](http://127.0.0.1:8080). Se a porta estiver ocupada, passe
+`--porta=8081` e use o endereço correspondente. O JAR roda sem internet, Maven,
+bibliotecas adicionais ou banco de dados quando já há Java instalado.
 
 ## Compilar e testar
 
@@ -43,9 +52,7 @@ Para recompilar, instale um **JDK** e confira `javac -version` e `jar` no PATH.
 
 O script compila o código, executa `EnqueteTest` e cria o JAR. Resultado
 esperado: linha iniciada por `OK: criação`. No Windows, confira o código de
-saída se o terminal mostrar os acentos incorretamente. O script de Windows
-foi testado neste ambiente. O script POSIX usa os mesmos comandos com o
-separador de classpath correspondente.
+saída se o terminal mostrar os acentos incorretamente. A compilação com JDK 9 ou superior tem Java 8 como alvo.
 
 ## Demonstrar
 
@@ -71,11 +78,11 @@ própria. No PowerShell:
 ```powershell
 New-Item -ItemType Directory -Force dados | Out-Null
 if (-not (Test-Path 'dados/demo.properties')) { Copy-Item 'demo/exemplo.properties' 'dados/demo.properties' }
-java -jar reposicao-de-aula.jar --dados=dados/demo.properties
+& '.\Iniciar Reposicao de Aula.cmd' --dados=dados/demo.properties
 ```
 
 No Linux/macOS, crie `dados/` e copie `demo/exemplo.properties` para
-`dados/demo.properties` antes de executar o último comando. Para abrir uma
+`dados/demo.properties` e execute `java -jar reposicao-de-aula.jar --dados=dados/demo.properties`. Para abrir uma
 nova enquete sem sobrescrever nenhuma, escolha outro arquivo ainda inexistente
 com `--dados=dados/nova.properties`.
 
@@ -99,6 +106,8 @@ com `--dados=dados/nova.properties`.
 
 ## Material da entrega
 
+- [Guia do grupo](docs/Guia-do-grupo-Reposicao-de-Aula.pdf) com a sequência
+  da apresentação, a preparação do empate e os trechos de código para explicar.
 - [Relatório acadêmico em PDF](docs/Relatorio-academico-Reposicao-de-Aula.pdf)
   e [versão editável em Word](docs/Relatorio-academico-Reposicao-de-Aula.docx).
   O relatório apresenta problema, escopo, decisões técnicas, testes e limites
@@ -119,3 +128,6 @@ e [Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.ht
 Para relacionar o código aos conteúdos da disciplina, consulte a [página de
 POOA do professor Mario Jorge Pereira](https://pooadoc.github.io/) e o
 [catálogo de Repository](https://martinfowler.com/eaaCatalog/repository.html).
+
+O relatório também está disponível em [HTML](docs/Relatorio-academico-Reposicao-de-Aula.html)
+para leitura no navegador, com o roteiro de abertura e a tabela da demonstração.

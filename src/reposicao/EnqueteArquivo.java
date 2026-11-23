@@ -17,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -30,43 +29,42 @@ final class EnqueteArquivo implements RepositorioEnquete {
     }
 
     @Override
-    public Optional<Enquete> carregar() throws IOException {
+    public Sessao carregar() throws IOException {
         Properties dados = new Properties();
         try (Reader leitor = Files.newBufferedReader(arquivo, StandardCharsets.UTF_8)) {
             dados.load(leitor);
         } catch (NoSuchFileException e) {
-            return Optional.empty();
+            return new Sessao(null, Collections.emptyList());
         } catch (IllegalArgumentException e) {
             throw new IOException("O arquivo de dados tem formato inválido.", e);
         }
         try {
-            List<LocalDateTime> horarios = lerHorarios(dados.getProperty("horarios"));
-            Map<String, Set<LocalDateTime>> respostas = new LinkedHashMap<>();
-            for (String chave : dados.stringPropertyNames()) {
-                if (chave.startsWith("voto.")) {
-                    List<LocalDateTime> horariosDaResposta = lerHorarios(dados.getProperty(chave));
-                    respostas.put(chave.substring(5), new LinkedHashSet<>(horariosDaResposta));
+            Enquete atual = lerEnquete(dados, "");
+            int total = Integer.parseInt(dados.getProperty("historico.total", "0"));
+            if (total < 0 || total > dados.size()) {
+                throw new IllegalArgumentException("Histórico inválido.");
+            }
+            List<Enquete> historico = new ArrayList<>();
+            for (int i = 1; i <= total; i++) {
+                Enquete anterior = lerEnquete(dados, prefixoHistorico(i));
+                if (!anterior.encerrada) {
+                    throw new IllegalArgumentException("Há uma enquete aberta no histórico.");
                 }
+                historico.add(anterior);
             }
-            String encerrada = dados.getProperty("encerrada");
-            if (!"true".equals(encerrada) && !"false".equals(encerrada)) {
-                throw new IllegalArgumentException("Estado inválido no arquivo.");
-            }
-            return Optional.of(new Enquete(dados.getProperty("aula", ""), horarios,
-                    respostas, Boolean.parseBoolean(encerrada)));
-        } catch (RuntimeException e) {
-            throw new IOException("Não foi possível ler a enquete existente. Preserve o arquivo de dados.", e);
+            return new Sessao(atual, historico);
+        } catch (IllegalArgumentException | java.time.format.DateTimeParseException e) {
+            throw new IOException("Não foi possível ler a sessão. Preserve o arquivo de dados.", e);
         }
     }
 
     @Override
-    public void salvar(Enquete enquete) throws IOException {
+    public void salvar(Sessao sessao) throws IOException {
         Properties dados = new Properties();
-        dados.setProperty("aula", enquete.aula);
-        dados.setProperty("horarios", juntar(enquete.horarios));
-        dados.setProperty("encerrada", Boolean.toString(enquete.encerrada));
-        for (Map.Entry<String, Set<LocalDateTime>> resposta : enquete.respostas.entrySet()) {
-            dados.setProperty("voto." + resposta.getKey(), juntar(resposta.getValue()));
+        escreverEnquete(dados, "", sessao.atual);
+        dados.setProperty("historico.total", Integer.toString(sessao.historico.size()));
+        for (int i = 0; i < sessao.historico.size(); i++) {
+            escreverEnquete(dados, prefixoHistorico(i + 1), sessao.historico.get(i));
         }
         Files.createDirectories(arquivo.getParent());
         Path temporario = Files.createTempFile(arquivo.getParent(), "enquete-", ".tmp");
@@ -82,6 +80,37 @@ final class EnqueteArquivo implements RepositorioEnquete {
             }
         } finally {
             Files.deleteIfExists(temporario);
+        }
+    }
+
+    private static String prefixoHistorico(int numero) {
+        return "historico." + numero + ".";
+    }
+
+    private static Enquete lerEnquete(Properties dados, String prefixo) {
+        List<LocalDateTime> horarios = lerHorarios(dados.getProperty(prefixo + "horarios"));
+        Map<String, Set<LocalDateTime>> respostas = new LinkedHashMap<>();
+        String prefixoVoto = prefixo + "voto.";
+        for (String chave : dados.stringPropertyNames()) {
+            if (chave.startsWith(prefixoVoto)) {
+                List<LocalDateTime> escolha = lerHorarios(dados.getProperty(chave));
+                respostas.put(chave.substring(prefixoVoto.length()), new LinkedHashSet<>(escolha));
+            }
+        }
+        String encerrada = dados.getProperty(prefixo + "encerrada");
+        if (!"true".equals(encerrada) && !"false".equals(encerrada)) {
+            throw new IllegalArgumentException("Estado inválido no arquivo.");
+        }
+        return new Enquete(dados.getProperty(prefixo + "aula", ""), horarios,
+                respostas, Boolean.parseBoolean(encerrada));
+    }
+
+    private static void escreverEnquete(Properties dados, String prefixo, Enquete enquete) {
+        dados.setProperty(prefixo + "aula", enquete.aula);
+        dados.setProperty(prefixo + "horarios", juntar(enquete.horarios));
+        dados.setProperty(prefixo + "encerrada", Boolean.toString(enquete.encerrada));
+        for (Map.Entry<String, Set<LocalDateTime>> resposta : enquete.respostas.entrySet()) {
+            dados.setProperty(prefixo + "voto." + resposta.getKey(), juntar(resposta.getValue()));
         }
     }
 

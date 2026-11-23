@@ -2,51 +2,68 @@ package reposicao;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import reposicao.RepositorioEnquete.Sessao;
 
 final class EnqueteService {
     private final RepositorioEnquete repositorio;
-    private Enquete atual;
+    private Sessao sessao;
 
     EnqueteService(RepositorioEnquete repositorio) throws IOException {
         this.repositorio = repositorio;
-        this.atual = repositorio.carregar().orElse(null);
+        this.sessao = repositorio.carregar();
     }
 
-    synchronized Optional<Enquete> consultar() {
-        return Optional.ofNullable(atual);
+    synchronized Sessao sessao() {
+        return sessao;
     }
 
-    synchronized void criar(String aula, List<LocalDateTime> horarios) throws IOException {
-        if (atual != null) {
-            throw new IllegalArgumentException("Já existe uma enquete nesta sessão.");
+    synchronized void criar(int numero, String aula, List<LocalDateTime> horarios) throws IOException {
+        conferirNumero(numero);
+        if (sessao.atual != null && !sessao.atual.encerrada) {
+            throw new IllegalArgumentException("Encerre a votação atual antes de criar outra enquete.");
         }
-        gravar(new Enquete(aula, horarios, Collections.emptyMap(), false));
+        Enquete nova = new Enquete(aula, horarios, Collections.emptyMap(), false);
+        List<Enquete> historico = new ArrayList<>(sessao.historico);
+        if (sessao.atual != null) {
+            historico.add(sessao.atual);
+        }
+        gravar(new Sessao(nova, historico));
     }
 
-    synchronized void responder(String codigo, Set<LocalDateTime> horarios, boolean nenhum) throws IOException {
-        gravar(exigirEnquete().comResposta(codigo, horarios, nenhum));
+    synchronized void responder(int numero, String codigo, Set<LocalDateTime> horarios, boolean nenhum) throws IOException {
+        conferirNumero(numero);
+        Enquete atualizada = exigirEnquete().comResposta(codigo, horarios, nenhum);
+        gravar(new Sessao(atualizada, sessao.historico));
     }
 
-    synchronized void encerrar() throws IOException {
+    synchronized void encerrar(int numero) throws IOException {
+        conferirNumero(numero);
         Enquete enquete = exigirEnquete();
         if (!enquete.encerrada) {
-            gravar(new Enquete(enquete.aula, enquete.horarios, enquete.respostas, true));
+            Enquete encerrada = new Enquete(enquete.aula, enquete.horarios, enquete.respostas, true);
+            gravar(new Sessao(encerrada, sessao.historico));
+        }
+    }
+
+    private void conferirNumero(int numero) {
+        if (numero != sessao.numeroAtual()) {
+            throw new IllegalArgumentException("Esta tela estava em outra enquete. Confira a enquete atual e tente novamente.");
         }
     }
 
     private Enquete exigirEnquete() {
-        if (atual == null) {
+        if (sessao.atual == null) {
             throw new IllegalArgumentException("Crie uma enquete primeiro.");
         }
-        return atual;
+        return sessao.atual;
     }
 
-    private void gravar(Enquete atualizada) throws IOException {
+    private void gravar(Sessao atualizada) throws IOException {
         repositorio.salvar(atualizada);
-        atual = atualizada;
+        sessao = atualizada;
     }
 }

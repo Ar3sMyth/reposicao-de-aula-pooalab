@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import reposicao.RepositorioEnquete.Sessao;
 
 public final class Aplicacao {
     private static final int LIMITE_FORMULARIO = 4096;
@@ -78,7 +79,7 @@ public final class Aplicacao {
             String endereco = "http://" + app.host;
             System.out.println("Abra " + endereco + " no navegador. Para encerrar, use Ctrl+C.");
             if (abrir) {
-                abrirNavegador(endereco);
+                abrirNavegador(endereco + (servico.sessao().atual == null ? "/professor" : ""));
             }
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Não foi possível iniciar. " + e.getMessage());
@@ -128,13 +129,50 @@ public final class Aplicacao {
             enviar(conexao, 200, "image/svg+xml", logo);
             return;
         }
-        Enquete enquete = servico.consultar().orElse(null);
-        if ("/".equals(rota)) {
-            html(conexao, 200, Tela.inicio(enquete, "", Collections.emptyMap()));
-        } else if ("/resultado".equals(rota)) {
-            html(conexao, 200, Tela.resultado(enquete, "", "sim".equals(conexao.getRequestURI().getQuery())));
+        Sessao sessao = servico.sessao();
+        String consulta = conexao.getRequestURI().getQuery();
+        switch (rota) {
+            case "/":
+                html(conexao, 200, Tela.inicio(sessao, "", Collections.emptyMap()));
+                break;
+            case "/resultado":
+                html(conexao, 200, Tela.resultado(sessao.atual, "sim".equals(consulta)));
+                break;
+            case "/professor":
+                String mensagem = "";
+                if ("criada".equals(consulta)) {
+                    mensagem = "Enquete aberta para a turma.";
+                } else if ("encerrada".equals(consulta)) {
+                    mensagem = "Votação encerrada.";
+                }
+                html(conexao, 200, Tela.professor(sessao, "", mensagem));
+                break;
+            case "/professor/nova":
+                if (sessao.atual == null || sessao.atual.encerrada) {
+                    html(conexao, 200, Tela.criar(sessao, "", Collections.emptyMap()));
+                } else {
+                    redirecionar(conexao, "/professor");
+                }
+                break;
+            case "/professor/historico":
+                mostrarHistorico(conexao, sessao, consulta);
+                break;
+            default:
+                html(conexao, 404, Tela.recado("Página não encontrada."));
+        }
+    }
+
+    private void mostrarHistorico(HttpExchange conexao, Sessao sessao, String consulta) throws IOException {
+        int numero;
+        try {
+            numero = Integer.parseInt(consulta);
+        } catch (NumberFormatException e) {
+            numero = 0;
+        }
+        if (numero < 1 || numero > sessao.historico.size()) {
+            html(conexao, 404, Tela.recado("Enquete do histórico não encontrada."));
         } else {
-            html(conexao, 404, Tela.recado("Página não encontrada."));
+            html(conexao, 200, Tela.historico(sessao.historico.get(numero - 1)));
         }
     }
 
@@ -153,6 +191,7 @@ public final class Aplicacao {
         Map<String, List<String>> dados = Collections.emptyMap();
         try {
             dados = lerFormulario(conexao.getRequestBody());
+            int numero = numeroEnquete(dados);
             switch (rota) {
                 case "/criar":
                     List<LocalDateTime> horarios = new ArrayList<>();
@@ -162,20 +201,20 @@ public final class Aplicacao {
                             horarios.add(LocalDateTime.parse(opcao));
                         }
                     }
-                    servico.criar(primeiro(dados, "aula"), horarios);
-                    redirecionar(conexao, "/");
+                    servico.criar(numero, primeiro(dados, "aula"), horarios);
+                    redirecionar(conexao, "/professor?criada");
                     break;
                 case "/responder":
                     Set<LocalDateTime> escolhidos = new LinkedHashSet<>();
                     for (String valor : dados.getOrDefault("opcao", Collections.emptyList())) {
                         escolhidos.add(LocalDateTime.parse(valor));
                     }
-                    servico.responder(primeiro(dados, "codigo"), escolhidos, dados.containsKey("nenhum"));
+                    servico.responder(numero, primeiro(dados, "codigo"), escolhidos, dados.containsKey("nenhum"));
                     redirecionar(conexao, "/resultado?sim");
                     break;
                 default:
-                    servico.encerrar();
-                    redirecionar(conexao, "/resultado");
+                    servico.encerrar(numero);
+                    redirecionar(conexao, "/professor?encerrada");
             }
         } catch (DateTimeParseException e) {
             erroFormulario(conexao, 400, rota, "Confira as datas e os horários informados.", dados);
@@ -189,9 +228,24 @@ public final class Aplicacao {
 
     private void erroFormulario(HttpExchange conexao, int status, String rota, String aviso,
             Map<String, List<String>> dados) throws IOException {
-        Enquete enquete = servico.consultar().orElse(null);
-        html(conexao, status, "/encerrar".equals(rota)
-                ? Tela.resultado(enquete, aviso, false) : Tela.inicio(enquete, aviso, dados));
+        Sessao sessao = servico.sessao();
+        Map<String, List<String>> rascunho = Integer.toString(sessao.numeroAtual()).equals(primeiro(dados, "enquete"))
+                ? dados : Collections.emptyMap();
+        if ("/responder".equals(rota)) {
+            html(conexao, status, Tela.inicio(sessao, aviso, rascunho));
+        } else if ("/criar".equals(rota) && (sessao.atual == null || sessao.atual.encerrada)) {
+            html(conexao, status, Tela.criar(sessao, aviso, rascunho));
+        } else {
+            html(conexao, status, Tela.professor(sessao, aviso, ""));
+        }
+    }
+
+    private static int numeroEnquete(Map<String, List<String>> dados) {
+        try {
+            return Integer.parseInt(primeiro(dados, "enquete"));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Abra a enquete novamente antes de enviar o formulário.");
+        }
     }
 
     static String primeiro(Map<String, List<String>> dados, String chave) {

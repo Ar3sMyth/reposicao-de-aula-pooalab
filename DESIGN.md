@@ -22,3 +22,10 @@ A01. O sumário usa links locais. Títulos em Georgia, corpo em fonte de sistema
 e o mesmo azul da aplicação dão continuidade ao material acadêmico. No celular,
 o sumário fica acima do conteúdo. Na impressão, os títulos e a tabela
 preservam a ordem de leitura. A marca original está embutida no HTML.
+
+## Áreas Aluno e Professor
+
+Aluno mostra a enquete e Resultado mostra só as contagens. Professor reúne
+as ações de criação e encerramento, os horários por código e o histórico. O
+atalho para as respostas leva à tabela na própria página. As três abas usam
+o cabeçalho e a navegação da interface original.

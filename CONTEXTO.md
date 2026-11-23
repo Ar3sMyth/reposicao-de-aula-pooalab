@@ -49,3 +49,20 @@ A ordenação ocorre em seguida. A leitura e a gravação de horários usam laç
 com o mesmo formato dos arquivos de dados anteriores. O roteiro apresenta o
 trecho de código por nome de método. O iniciador do Windows continua na raiz,
 com o PowerShell de instalação em `scripts/`.
+
+## Área Professor e histórico
+
+A área Professor permite criar e encerrar enquetes e ver os horários de cada
+código. A área Aluno recebe as respostas e Resultado exibe só os totais.
+As áreas são locais e sem login. Na demonstração, use códigos fictícios.
+
+Há uma enquete aberta por vez. Quando outra é criada, a anterior é arquivada
+com os horários, as respostas e o estado encerrado. A enquete atual e o
+histórico são gravados juntos no mesmo arquivo, com o mesmo formato anterior
+para a enquete atual. Sessões antigas abrem sem histórico. Formulários de
+outra enquete são recusados para evitar voto ou encerramento no lugar errado.
+
+Os testes Java verificaram erro de gravação, criação de outra enquete, mais
+de uma entrada no histórico e recuperação após reiniciar. O fluxo no Chrome
+foi conferido em desktop e celular emulado. README, relatório e roteiro de
+apresentação foram ajustados para a nova navegação.

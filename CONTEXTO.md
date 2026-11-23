@@ -28,6 +28,10 @@ relatório acadêmico. O PDF foi exportado a partir dele e o HTML reúne esse co
   criado com visibilidade privada. A pasta de entrega é
   [POOALAB 2026.2](https://drive.google.com/drive/folders/19F2ZUCKcCNuO0Bf4oNsTSc96_NxrdBMp).
 
+- Nomes padronizados no Drive e no ZIP. O pacote se chama
+  `Reposição de Aula - POOALAB 2026.2.zip`. Os documentos se identificam
+  como Roteiro de Apresentação ou Relatório Acadêmico.
+
 ## Retomada
 
 Abra o guia do grupo e ensaie com uma cópia de `demo/exemplo.properties`.

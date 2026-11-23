@@ -106,10 +106,10 @@ com `--dados=dados/nova.properties`.
 
 ## Material da entrega
 
-- [Guia do grupo](docs/Guia-do-grupo-Reposicao-de-Aula.pdf) com a sequência
+- [Guia do grupo](<docs/Reposição de Aula - Roteiro de Apresentação.pdf>) com a sequência
   da apresentação, a preparação do empate e os trechos de código para explicar.
-- [Relatório acadêmico em PDF](docs/Relatorio-academico-Reposicao-de-Aula.pdf)
-  e [versão editável em Word](docs/Relatorio-academico-Reposicao-de-Aula.docx).
+- [Relatório acadêmico em PDF](<docs/Reposição de Aula - Relatório Acadêmico.pdf>)
+  e [versão editável em Word](<docs/Reposição de Aula - Relatório Acadêmico.docx>).
   O relatório apresenta problema, escopo, decisões técnicas, testes e limites
   do MVP, em formato adaptado do
   [manual da Biblioteca da UCSal](https://ri.ucsal.br/handle/prefix/2148).
@@ -129,5 +129,5 @@ Para relacionar o código aos conteúdos da disciplina, consulte a [página de
 POOA do professor Mario Jorge Pereira](https://pooadoc.github.io/) e o
 [catálogo de Repository](https://martinfowler.com/eaaCatalog/repository.html).
 
-O relatório também está disponível em [HTML](docs/Relatorio-academico-Reposicao-de-Aula.html)
+O relatório também está disponível em [HTML](<docs/Reposição de Aula - Relatório Acadêmico.html>)
 para leitura no navegador, com o roteiro de abertura e a tabela da demonstração.

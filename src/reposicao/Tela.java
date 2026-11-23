@@ -86,10 +86,23 @@ final class Tela {
         return pagina("Resultado", corpo, "/resultado");
     }
 
+    static String entrar(String aviso) {
+        return pagina("Entrar como professor", "<h1>Professor</h1>"
+                + "<p>Use a senha de seis dígitos mostrada na janela do iniciador na primeira abertura.</p>" + erro(aviso)
+                + "<form method=\"post\" action=\"/professor/entrar\">"
+                + "<label for=\"senha\">Senha do professor</label>"
+                + "<input id=\"senha\" name=\"senha\" type=\"password\" inputmode=\"numeric\""
+                + " autocomplete=\"current-password\" required maxlength=\"6\" pattern=\"[0-9]{6}\">"
+                + "<button type=\"submit\">Entrar</button></form>", "/professor");
+    }
+
     static String professor(Sessao sessao, String aviso, String mensagem) {
         Enquete enquete = sessao.atual;
-        StringBuilder corpo = new StringBuilder("<h1>Professor</h1>" + erro(aviso)
-                + "<p class=\"dica\">Demonstração local sem login. Use códigos fictícios.</p>"
+        StringBuilder corpo = new StringBuilder("<div class=\"cabecalho-professor\"><h1>Professor</h1>"
+                + "<form class=\"sair-professor\" method=\"post\" action=\"/professor/sair\">"
+                + "<button type=\"submit\" aria-label=\"Sair da área do professor\">Sair</button></form></div>"
+                + erro(aviso)
+                + "<p class=\"dica\">Demonstração local. Use códigos fictícios.</p>"
                 + (mensagem.isEmpty() ? "" : "<p class=\"mensagem\" role=\"status\">" + mensagem + "</p>"));
         if (enquete == null) {
             corpo.append("<p>A turma ainda não tem uma enquete.</p>"

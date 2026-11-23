@@ -32,7 +32,7 @@ main section { margin-top: 1.75rem; }
 form { margin-top: 1.35rem; }
 label, legend { display: block; font-weight: 700; margin-bottom: .25rem; }
 input:not([type=checkbox]) { display: block; width: 100%; min-width: 0; min-height: 2.75rem; padding: .5rem .6rem; border: 1px solid #737c8f; border-radius: .18rem; background: #fff; color: inherit; font: inherit; }
-#codigo { max-width: 16rem; }
+#codigo, #senha { max-width: 16rem; }
 .opcional, .dica { color: var(--suave); font-size: .9rem; font-weight: 400; }
 .dica { margin-top: .35rem; }
 .grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
@@ -61,6 +61,10 @@ td { font-variant-numeric: tabular-nums; }
 .respostas td time + time { margin-top: .25rem; }
 small { display: block; font-weight: 400; }
 .acoes { margin-top: 1rem; }
+.cabecalho-professor { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; }
+.sair-professor, .sair-professor button { margin: 0; }
+.sair-professor button { background: #fff; color: var(--azul); }
+.sair-professor button:hover { background: var(--fundo); }
 details { margin-top: .5rem; }
 details p { margin: .5rem 0 0; }
 details form { margin: 0; }

@@ -25,9 +25,26 @@ java -jar reposicao-de-aula.jar
 Abra [http://127.0.0.1:8080](http://127.0.0.1:8080). Se a porta estiver ocupada,
 passe `--porta=8081` e abra o endereço com a porta 8081.
 
+## Senha do professor
+
+Na primeira abertura, o iniciador mostra uma senha de seis dígitos. Guarde-a
+com o professor e use-a para entrar na aba **Professor**. Ela continua válida
+ao reiniciar a mesma sessão. Os alunos votam apenas com o código fictício.
+Use **Sair** antes de passar o computador para outra pessoa. Mantenha a janela
+do iniciador com o professor, pois ela exibe a senha na primeira abertura.
+
+Se perder a senha, feche o sistema e execute na pasta extraída:
+
+```powershell
+& '.\Iniciar Reposicao de Aula.cmd' --nova-senha-professor
+```
+
+Se estiver usando uma demonstração com `--dados`, repita esse argumento para
+gerar a senha da sessão certa. A troca mantém as enquetes e o histórico.
+
 ## Como demonstrar
 
-1. Na aba **Professor**, clique em **Criar enquete**. Cadastre horários em 02/12/2026 às 18h, 03/12/2026 às 19h e
+1. Entre na aba **Professor** com a senha e clique em **Criar enquete**. Cadastre horários em 02/12/2026 às 18h, 03/12/2026 às 19h e
    04/12/2026 às 20h.
 2. Na aba **Aluno**, use `A01` nas opções 1 e 2, `B02` na opção 1 e `C03` na opção 2.
    O placar mostra três respostas e as indicações 2, 2 e 0.
@@ -51,10 +68,11 @@ Ele usa uma cópia de `demo/exemplo.properties`.
   histórico em um arquivo `.properties`.
 - [Aplicacao.java](src/reposicao/Aplicacao.java) recebe os formulários.
   [Tela.java](src/reposicao/Tela.java) monta as páginas.
+  [AcessoProfessor.java](src/reposicao/AcessoProfessor.java) verifica a senha e a sessão.
   [scripts/iniciar.ps1](scripts/iniciar.ps1) prepara o Java no Windows.
 
-O sistema é local e sem login. As abas separam as tarefas de aluno e professor
-na demonstração. Use códigos fictícios e uma instância por arquivo de dados. A hipótese
+O sistema é local. A senha protege a área Professor no navegador. Use códigos
+fictícios e uma instância por arquivo de dados. A hipótese
 sobre como a turma organiza reposições ainda precisa de validação com colegas.
 
 ## Como compilar e testar
@@ -70,8 +88,14 @@ recriam o JAR.
 - Relatório acadêmico em [HTML](<docs/Reposição de Aula - Relatório Acadêmico.html>),
   [PDF](<docs/Reposição de Aula - Relatório Acadêmico.pdf>) e
   [Word](<docs/Reposição de Aula - Relatório Acadêmico.docx>).
-- [Pitch](docs/pitch-base.pdf), [roteiro editável](docs/roteiro-pitch.md) e
-  [demonstração de contingência](demo/roteiro-visual.pdf).
-- [Escopo do MVP](docs/definicao-mvp.md) e [registro de validação](docs/problema-validacao.md).
-- [Declaração de uso de IA e componentes de terceiros](docs/declaracao-ia-terceiros.md).
-  O Codex apoiou o recorte, o código, os testes e a documentação.
+- [Slides da apresentação](<docs/Reposição de Aula - Apresentação POOALAB.pdf>),
+  [roteiro da apresentação](<docs/Reposição de Aula - Roteiro de Apresentação.pdf>)
+  e [demonstração de contingência](demo/roteiro-visual.pdf).
+- O relatório inclui o roteiro de validação e a declaração de uso de IA e
+  componentes de terceiros. A validação com colegas e a ciência do grupo estão
+  pendentes.
+
+A versão de entrega inclui acesso por senha na aba Professor e mantém o
+histórico de enquetes no arquivo de dados. O ZIP do Drive acompanha o código
+da branch `main`. Para atualizar a entrega, recompile o JAR e monte o ZIP
+sem os arquivos gerados em `dados/`, `.java/` ou `build/`.

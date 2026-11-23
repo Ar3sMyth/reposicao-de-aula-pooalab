@@ -27,11 +27,15 @@ public final class Aplicacao {
     private static final int LIMITE_FORMULARIO = 4096;
     private final EnqueteService servico;
     private final String host;
+    private final AcessoProfessor acesso;
+    private final String nomeCookie;
     private final byte[] css;
     private final byte[] logo;
 
-    private Aplicacao(EnqueteService servico, int porta) throws IOException {
+    private Aplicacao(EnqueteService servico, int porta, AcessoProfessor acesso) throws IOException {
         this.servico = servico;
+        this.acesso = acesso;
+        this.nomeCookie = "professor_" + porta;
         this.host = "127.0.0.1:" + porta;
         this.css = lerRecurso("/estilos.css");
         this.logo = lerRecurso("/ucsal.svg");
@@ -56,6 +60,7 @@ public final class Aplicacao {
         try {
             int porta = 8080;
             boolean abrir = false;
+            boolean novaSenha = false;
             Path dados = Paths.get("dados", "enquete.properties");
             for (String arg : args) {
                 if (arg.startsWith("--porta=")) {
@@ -64,6 +69,8 @@ public final class Aplicacao {
                     dados = Paths.get(arg.substring(8));
                 } else if ("--abrir".equals(arg)) {
                     abrir = true;
+                } else if ("--nova-senha-professor".equals(arg)) {
+                    novaSenha = true;
                 } else {
                     throw new IllegalArgumentException("Argumento desconhecido: " + arg);
                 }
@@ -73,7 +80,8 @@ public final class Aplicacao {
             }
             EnqueteService servico = new EnqueteService(new EnqueteArquivo(dados));
             HttpServer servidor = HttpServer.create(new InetSocketAddress("127.0.0.1", porta), 0);
-            Aplicacao app = new Aplicacao(servico, servidor.getAddress().getPort());
+            AcessoProfessor acesso = AcessoProfessor.abrir(dados, novaSenha);
+            Aplicacao app = new Aplicacao(servico, servidor.getAddress().getPort(), acesso);
             servidor.createContext("/", app::atender);
             servidor.start();
             String endereco = "http://" + app.host;
@@ -107,10 +115,20 @@ public final class Aplicacao {
             }
             String rota = conexao.getRequestURI().getPath();
             String metodo = conexao.getRequestMethod();
+            boolean professor = "/professor".equals(rota) || rota.startsWith("/professor/")
+                    || "/criar".equals(rota) || "/encerrar".equals(rota);
+            if (professor && !"/professor/entrar".equals(rota) && !acesso.autorizado(chave(conexao))) {
+                if ("GET".equals(metodo)) {
+                    redirecionar(conexao, "/professor/entrar");
+                } else {
+                    html(conexao, 403, Tela.entrar("Entre como professor para realizar esta ação."));
+                }
+                return;
+            }
             if ("GET".equals(metodo)) {
                 mostrar(conexao, rota);
-            } else if ("POST".equals(metodo) && ("/criar".equals(rota)
-                    || "/responder".equals(rota) || "/encerrar".equals(rota))) {
+            } else if ("POST".equals(metodo) && ("/criar".equals(rota) || "/responder".equals(rota)
+                    || "/encerrar".equals(rota) || "/professor/entrar".equals(rota) || "/professor/sair".equals(rota))) {
                 alterar(conexao, rota);
             } else {
                 html(conexao, 404, Tela.recado("Página não encontrada."));
@@ -137,6 +155,13 @@ public final class Aplicacao {
                 break;
             case "/resultado":
                 html(conexao, 200, Tela.resultado(sessao.atual, "sim".equals(consulta)));
+                break;
+            case "/professor/entrar":
+                if (acesso.autorizado(chave(conexao))) {
+                    redirecionar(conexao, "/professor");
+                } else {
+                    html(conexao, 200, Tela.entrar(""));
+                }
                 break;
             case "/professor":
                 String mensagem = "";
@@ -191,6 +216,16 @@ public final class Aplicacao {
         Map<String, List<String>> dados = Collections.emptyMap();
         try {
             dados = lerFormulario(conexao.getRequestBody());
+            if ("/professor/entrar".equals(rota)) {
+                entrar(conexao, primeiro(dados, "senha"));
+                return;
+            }
+            if ("/professor/sair".equals(rota)) {
+                acesso.sair(chave(conexao));
+                enviarCookie(conexao, "", 0);
+                redirecionar(conexao, "/professor/entrar");
+                return;
+            }
             int numero = numeroEnquete(dados);
             switch (rota) {
                 case "/criar":
@@ -226,12 +261,46 @@ public final class Aplicacao {
         }
     }
 
+    private void entrar(HttpExchange conexao, String senha) throws IOException {
+        String chave = acesso.entrar(senha);
+        if (chave == null) {
+            conexao.getResponseHeaders().set("Retry-After", "30");
+            html(conexao, 429, Tela.entrar("Muitas tentativas. Aguarde 30 segundos e tente de novo."));
+        } else if (chave.isEmpty()) {
+            html(conexao, 403, Tela.entrar("Senha incorreta."));
+        } else {
+            enviarCookie(conexao, chave, AcessoProfessor.DURACAO_SESSAO_SEGUNDOS);
+            redirecionar(conexao, "/professor");
+        }
+    }
+
+    private void enviarCookie(HttpExchange conexao, String chave, int duracao) {
+        conexao.getResponseHeaders().set("Set-Cookie", nomeCookie + "=" + chave
+                + "; Path=/; HttpOnly; SameSite=Strict; Max-Age=" + duracao);
+    }
+
+    private String chave(HttpExchange conexao) {
+        List<String> cabecalhos = conexao.getRequestHeaders().getOrDefault("Cookie", Collections.emptyList());
+        String inicio = nomeCookie + "=";
+        for (String cabecalho : cabecalhos) {
+            for (String item : cabecalho.split(";")) {
+                String cookie = item.trim();
+                if (cookie.startsWith(inicio)) {
+                    return cookie.substring(inicio.length());
+                }
+            }
+        }
+        return "";
+    }
+
     private void erroFormulario(HttpExchange conexao, int status, String rota, String aviso,
             Map<String, List<String>> dados) throws IOException {
         Sessao sessao = servico.sessao();
         Map<String, List<String>> rascunho = Integer.toString(sessao.numeroAtual()).equals(primeiro(dados, "enquete"))
                 ? dados : Collections.emptyMap();
-        if ("/responder".equals(rota)) {
+        if ("/professor/entrar".equals(rota)) {
+            html(conexao, status, Tela.entrar(aviso));
+        } else if ("/responder".equals(rota)) {
             html(conexao, status, Tela.inicio(sessao, aviso, rascunho));
         } else if ("/criar".equals(rota) && (sessao.atual == null || sessao.atual.encerrada)) {
             html(conexao, status, Tela.criar(sessao, aviso, rascunho));

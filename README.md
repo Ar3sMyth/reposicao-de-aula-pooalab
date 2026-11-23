@@ -122,3 +122,7 @@ que ainda precisa ser feito.
 O Codex apoiou a implementação, os testes e a documentação. O
 [Anexo E](docs/declaracao-ia-terceiros.pdf) reúne as fontes, licenças e campos
 de ciência da equipe.
+
+## Material complementar
+
+[Relatório acadêmico em PDF](<docs/Reposição de Aula - Relatório Acadêmico.pdf>).

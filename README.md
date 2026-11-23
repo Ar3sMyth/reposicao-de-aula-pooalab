@@ -80,17 +80,16 @@ Copy-Item demo/exemplo.properties $sessao
 
 ## Anexo B · Registro de validação
 
-| Data e perfil | Hipótese | Evidência observada | Decisão |
+| Data e perfil | Hipótese ou fluxo verificado | Evidência observada | Decisão |
 | --- | --- | --- | --- |
-| 23/11/2026 · teste técnico com dados fictícios | Um novo envio com o mesmo código substitui o anterior e o placar continua disponível após reiniciar. | A edição de A01 desempatou o placar sem aumentar o total de respostas. O histórico permaneceu disponível após reiniciar. | Manter a edição por código e gravar as enquetes encerradas no mesmo arquivo local. |
+| 23/11/2026 · teste técnico com dados fictícios | Reenviar o código substitui a resposta anterior e o histórico continua disponível ao reiniciar. | A edição de A01 desempatou o placar sem aumentar o total de respostas. O histórico foi recuperado após reiniciar. | Manter a edição por código e o histórico no mesmo arquivo local. |
+| 23/11/2026 · teste técnico do ZIP no Windows x64 | A aplicação inicia em uma pasta recém-extraída e separa as permissões de aluno e professor. | O iniciador baixou o Java na primeira abertura e o reutilizou depois. Os testes conferiram voto por código, bloqueio de ações do professor sem senha, saída e senha preservada após reiniciar. | Manter o ZIP com o iniciador, os dados de exemplo e a senha local do professor. |
+| Relato confirmado em 23/11/2026 · P1 e P2, perfil não informado | Experimentar a enquete e conhecer a área Professor. | Segundo a equipe, os dois participantes testaram a enquete e consultaram a área Professor. O relato disponível identifica as etapas, sem observações individuais. | Registrar os dois testes iniciais. Nenhuma mudança foi atribuída a esse relato. |
 
-**Método com o público:** pedir a alguém que já organizou uma reposição que
-relate como comparou os horários. Depois, observar um colega votar, alterar
-sua resposta e interpretar o empate. Registrar o perfil sem identificação.
-
-**Aprendizado e limite:** o teste confirmou o fluxo do software. A hipótese
-sobre a rotina da turma ainda não foi verificada com participantes reais.
-Nenhuma mudança de problema foi atribuída a entrevistas ou observações.
+**Próximo teste com o público:** observar como uma turma compara horários em
+uma reposição real. Registrar o que ajuda ou dificulta a escolha, com perfil
+sem identificação. O teste inicial confirma as etapas percorridas. A hipótese
+sobre a rotina da turma ainda está em aberto.
 
 ## Anexo C · Definição do MVP
 
@@ -109,8 +108,8 @@ Nenhuma mudança de problema foi atribuída a entrevistas ou observações.
 
 ## Anexo D · Roteiro do pitch
 
-Apresentar a dificuldade de comparar horários e a hipótese ainda pendente.
-Em seguida, abrir o exemplo, alterar A01, entrar como professor, encerrar e
+Apresentar a dificuldade de comparar horários e relatar que dois participantes
+testaram a enquete e consultaram a área Professor. Em seguida, abrir o exemplo, alterar A01, entrar como professor, encerrar e
 mostrar o histórico. Fechar explicando o recorte local e o teste com colegas
 que ainda precisa ser feito.
 

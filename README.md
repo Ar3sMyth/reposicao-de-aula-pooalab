@@ -119,8 +119,7 @@ que ainda precisa ser feito.
 ## Anexo E · Declaração de uso de IA e de terceiros
 
 O Codex apoiou a implementação, os testes e a documentação. O
-[Anexo E](docs/declaracao-ia-terceiros.pdf) reúne as fontes, licenças e campos
-de ciência da equipe.
+[Anexo E](docs/declaracao-ia-terceiros.pdf) reúne as fontes, as licenças e o registro de ciência da equipe.
 
 ## Material complementar
 
